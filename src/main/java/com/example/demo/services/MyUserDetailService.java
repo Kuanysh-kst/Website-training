@@ -1,6 +1,6 @@
 package com.example.demo.services;
 
-import com.example.demo.config.MyUserDetails;
+import com.example.demo.configs.MyUserDetails;
 import com.example.demo.models.MyUser;
 import com.example.demo.repositories.MyUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +8,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class MyUserDetailService implements UserDetailsService {
