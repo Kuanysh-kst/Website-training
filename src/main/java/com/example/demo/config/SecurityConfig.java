@@ -20,7 +20,6 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
@@ -52,12 +51,12 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-                        .requestMatchers("/welcome").permitAll()
+                        .requestMatchers("/welcome", "/hello").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/new-user").permitAll()
                         .requestMatchers("/api/**").authenticated()
                 )
-                //.httpBasic(Customizer.withDefaults())
-                .formLogin(AbstractAuthenticationFilterConfigurer::permitAll)
+                .httpBasic(Customizer.withDefaults())
+                //.formLogin(AbstractAuthenticationFilterConfigurer::permitAll)
                 .build();
     }
 

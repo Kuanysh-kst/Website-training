@@ -13,4 +13,9 @@ public class MainController {
     public String welcome() {
         return "Welcome to the unprotected page";
     }
+    @GetMapping("hello")
+    public String hello() {
+        return "Hello";
+    }
+
 }
