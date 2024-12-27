@@ -56,7 +56,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/new-user").permitAll()
                         .requestMatchers("/api/**").authenticated()
                 )
-                .httpBasic(Customizer.withDefaults())
+                //.httpBasic(Customizer.withDefaults())
                 .formLogin(AbstractAuthenticationFilterConfigurer::permitAll)
                 .build();
     }
