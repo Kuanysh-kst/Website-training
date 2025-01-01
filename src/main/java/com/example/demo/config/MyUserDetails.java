@@ -7,19 +7,20 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class MyUserDetails implements UserDetails {
 
     private final MyUser user;
+
     public MyUserDetails(MyUser user) {
         this.user = user;
     }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Arrays.stream(user.getRole().split(", "))
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+        return List.of(new SimpleGrantedAuthority(user.getRole().name()));
     }
 
     @Override
@@ -29,6 +30,6 @@ public class MyUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getName();
+        return user.getEmail();
     }
 }
