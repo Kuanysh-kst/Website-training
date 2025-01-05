@@ -6,7 +6,6 @@ import com.example.demo.auth.RegisterRequest;
 import com.example.demo.models.MyUser;
 import com.example.demo.models.Role;
 import com.example.demo.repositories.MyUserRepository;
-import com.example.demo.services.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
