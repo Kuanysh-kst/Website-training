@@ -19,6 +19,7 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 public class MyUser implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -44,5 +45,4 @@ public class MyUser implements UserDetails {
     public String getUsername() {
         return email;
     }
-
 }
