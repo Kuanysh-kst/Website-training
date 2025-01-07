@@ -26,7 +26,7 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 public class MyUser implements UserDetails {
-
+    // todo CRUD for this model
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
