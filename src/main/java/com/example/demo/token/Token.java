@@ -1,7 +1,13 @@
 package com.example.demo.token;
 
 import com.example.demo.models.MyUser;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +21,7 @@ import lombok.NoArgsConstructor;
 public class Token {
     @Id
     @GeneratedValue
-    private Integer id;
+    private Long id;
     private String token;
     @Enumerated(EnumType.STRING)
     private TokenType tokenType;
