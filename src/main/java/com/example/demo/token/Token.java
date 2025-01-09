@@ -1,5 +1,6 @@
 package com.example.demo.token;
 
+import com.example.demo.models.MyUser;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,5 +21,8 @@ public class Token {
     private TokenType tokenType;
     private boolean expired;
     private boolean revoked;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private MyUser user;
 
 }
