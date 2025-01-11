@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TokenRepository extends JpaRepository<Token, Long> {
-    @Query("""
-                SELECT t
+    @Query(value = """
+                SELECT t.*
                 FROM token t
-                INNER JOIN user u ON t.user.id = u.id
-                WHERE u.id = :userId and (t.expired = false or t.revoked = false)
-            """)
+                INNER JOIN users u ON t.user_id = u.id
+                WHERE u.id = :userId AND (t.expired = false or t.revoked = false)
+            """, nativeQuery = true)
     List<Token> findAllValidTokensByUser(Long userId);
 
     Optional<Token> findByToken(String token);
