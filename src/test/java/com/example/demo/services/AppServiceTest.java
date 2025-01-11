@@ -25,7 +25,7 @@ public class AppServiceTest {
 
     public void loadAppInDB(){
         Faker faker = new Faker();
-        applications = IntStream.rangeClosed(1, 100)
+        applications = IntStream.rangeClosed(1, 3)
                 .mapToObj(i -> Application.builder()
                         .id(i)
                         .name(faker.app().name())
