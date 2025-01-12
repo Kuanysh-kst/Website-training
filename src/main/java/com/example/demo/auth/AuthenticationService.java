@@ -2,7 +2,7 @@ package com.example.demo.auth;
 
 import com.example.demo.models.MyUser;
 import com.example.demo.repositories.MyUserRepository;
-import com.example.demo.jwt.JwtService;
+import com.example.demo.config.JwtService;
 import com.example.demo.token.Token;
 import com.example.demo.token.TokenRepository;
 import com.example.demo.token.TokenType;
@@ -35,7 +35,7 @@ public class AuthenticationService {
         var jwtToken = jwtService.generateToken(user);
         saveUserToken(savedUser, jwtToken);
         return AuthenticationResponse.builder()
-                .token(jwtToken)
+                .accessToken(jwtToken)
                 .build();
     }
 
@@ -65,7 +65,7 @@ public class AuthenticationService {
         revokeAllUserTokens(user);
         saveUserToken(user, jwtToken);
         return AuthenticationResponse.builder()
-                .token(jwtToken)
+                .accessToken(jwtToken)
                 .build();
     }
 

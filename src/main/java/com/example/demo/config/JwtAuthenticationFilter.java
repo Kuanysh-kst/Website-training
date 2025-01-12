@@ -1,4 +1,4 @@
-package com.example.demo.jwt;
+package com.example.demo.config;
 
 import com.example.demo.token.TokenRepository;
 import jakarta.servlet.FilterChain;
