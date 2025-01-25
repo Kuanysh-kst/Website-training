@@ -18,4 +18,9 @@ public class MainController {
         return "Hello";
     }
 
+    @GetMapping("/authenticated-user")
+    public String authenticatedUser() {
+        return "Hello authenticated user!";
+    }
+
 }
