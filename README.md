@@ -67,4 +67,8 @@ docker-compose up
 docker-compose down -v
 ```
 из корневой папки проекта
+
+## ./gradlew 
+./gradlew clean test : удаляет build, запускает все тесты
+
             
