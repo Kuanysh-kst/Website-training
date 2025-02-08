@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestCalculator {
+    //test<System under test or method under test>_<Condition or state change>_<Expected result>
     @Test
     void testIntegerDivision_whenValidValueProvided_shouldReturnExpectedResult() {
         //Arrange
@@ -16,7 +17,7 @@ public class TestCalculator {
     }
 
     @Test
-    void testIntegerSubtraction() {
+    void testIntegerSubtraction_whenValidValueProvided_shouldReturnExpectedResult() {
         Calculator calculator = new Calculator();
 
         var minuend = 33;
@@ -25,7 +26,7 @@ public class TestCalculator {
 
         int actualResult = calculator.integerSubtraction(minuend, subtrahend);
 
-        assertEquals(result, actualResult, String.format("%d - %d should have returned %d",
+        assertEquals(result, actualResult, () -> String.format("%d - %d should have returned %d",
                 minuend, subtrahend, result));
     }
 }
