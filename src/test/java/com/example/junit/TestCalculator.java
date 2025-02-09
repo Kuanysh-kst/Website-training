@@ -43,16 +43,11 @@ public class TestCalculator {
     }
 
     //test<System under test or method under test>_<Condition or state change>_<Expected result>
-    @DisplayName("Test 4 / 2 = 2")
-    @Test
-    void testIntegerDivision_WhenFourDividedByTwo_ShouldReturnTwo() {
-        System.out.println("Running Test 4 / 2 = 2");
-        // AAA
-
-        // Arrange // Given
-        int dividend = 4;
-        int division = 2;
-        int expectedResult = 4 - 2;
+    @DisplayName("Test integer division [dividend, division, expectedResult]")
+    @ParameterizedTest
+    @MethodSource()
+    void testIntegerDivision_WhenFourDividedByTwo_ShouldReturnTwo(int dividend, int division, int expectedResult) {
+        System.out.printf("Running Test %d / %d = %d%n", dividend, division, expectedResult);
 
         // Act // When
         int actualResult = calculator.integerDivision(dividend, division);
@@ -62,14 +57,12 @@ public class TestCalculator {
                 dividend, division, expectedResult));
     }
 
-    @DisplayName("Test division by zero")
-    @Test
-    void testIntegerDivision_WhenDividendDividedByZero_ShouldThrowArithmeticException() {
-        System.out.println("Running Test division by zero");
+    @DisplayName("Test integer division by zero [dividend, division]")
+    @ParameterizedTest
+    @MethodSource
+    void testIntegerDivision_WhenDividendDividedByZero_ShouldThrowArithmeticException(int dividend, int division) {
+        System.out.printf("Running Test %d by zero%n", dividend);
 
-        // Arrange
-        int dividend = 4;
-        int division = 0;
         String expectedExceptionMessage = "/ by zero";
 
         // Act & Assert
@@ -107,6 +100,20 @@ public class TestCalculator {
         return Stream.of(
                 Arguments.of(33, 1, 32),
                 Arguments.of(43, 1, 42)
+        );
+    }
+
+    private static Stream<Arguments> testIntegerDivision_WhenDividendDividedByZero_ShouldThrowArithmeticException() {
+        return Stream.of(
+                Arguments.of(4, 0),
+                Arguments.of(5, 0)
+        );
+    }
+
+    private static Stream<Arguments> testIntegerDivision_WhenFourDividedByTwo_ShouldReturnTwo() {
+        return Stream.of(
+                Arguments.of(4, 2, 2),
+                Arguments.of(100, 20, 5)
         );
     }
 }
