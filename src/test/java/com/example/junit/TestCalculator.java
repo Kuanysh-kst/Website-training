@@ -7,8 +7,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @DisplayName("Test Math operations in Calculator class")
 public class TestCalculator {
@@ -77,18 +84,16 @@ public class TestCalculator {
         );
     }
 
-    @DisplayName("Test 33 - 1 = 31")
-    @Test
-    void testIntegerSubtraction_WhenValidValueProvided_ShouldReturnExpectedResult() {
-        System.out.println("Running Test 33 - 1 = 31");
-        var minuend = 33;
-        var subtrahend = 1;
-        var result = minuend - subtrahend;
+    @DisplayName("Test integer subtraction [minuend, subtrahend, expectedResult]")
+    @ParameterizedTest
+    @MethodSource()
+    void testIntegerSubtraction_WhenValidValueProvided_ShouldReturnExpectedResult(int minuend, int subtrahend, int expectedResult) {
+        System.out.printf("Running Test %d - %d = %d%n", minuend, subtrahend, expectedResult);
 
         int actualResult = calculator.integerSubtraction(minuend, subtrahend);
 
-        assertEquals(result, actualResult, () -> String.format("%d - %d should have returned %d",
-                minuend, subtrahend, result));
+        assertEquals(expectedResult, actualResult, () -> String.format("%d - %d should have returned %d",
+                minuend, subtrahend, expectedResult));
     }
 
     @Disabled("For show how to word Disabled annotation")
@@ -96,5 +101,12 @@ public class TestCalculator {
     @Test
     void testFailMethod() {
         fail("Always fail!");
+    }
+
+    private static Stream<Arguments> testIntegerSubtraction_WhenValidValueProvided_ShouldReturnExpectedResult() {
+        return Stream.of(
+                Arguments.of(33, 1, 32),
+                Arguments.of(43, 1, 42)
+        );
     }
 }
