@@ -8,4 +8,8 @@ public class Calculator {
     public int integerSubtraction(int minuend, int subtrahend) {
         return minuend - subtrahend;
     }
+
+    public int integerMultiply(int i, int j) {
+        return i * j;
+    }
 }

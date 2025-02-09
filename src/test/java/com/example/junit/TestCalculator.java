@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvFileSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
@@ -94,6 +95,18 @@ public class TestCalculator {
     @Test
     void testFailMethod() {
         fail("Always fail!");
+    }
+
+    @DisplayName("Test integer multiply [i, j]")
+    @ParameterizedTest
+    @CsvFileSource(resources = "/integerMultiply.csv")
+    void integerMultiply(int i, int j, int expectedResult) {
+        System.out.printf("Running Test %d * %d = %d%n", i, j, expectedResult);
+
+        int actualResult = calculator.integerMultiply(i, j);
+
+        assertEquals(expectedResult, actualResult,() ->  String.format("%d * %d should have returned %d, but was %d",
+                i, j, expectedResult, actualResult));
     }
 
     private static Stream<Arguments> testIntegerSubtraction_WhenValidValueProvided_ShouldReturnExpectedResult() {
