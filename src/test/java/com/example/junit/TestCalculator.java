@@ -1,46 +1,66 @@
 package com.example.junit;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("Test Math operations in Calculator class")
 public class TestCalculator {
+    Calculator calculator;
+
+    @BeforeAll
+    static void setup() {
+        System.out.println("Executing @BeforeAll method!");
+    }
+
+    @AfterAll
+    static void cleanup() {
+        System.out.println("Executing @AfterAll method!");
+    }
+
+    @BeforeEach
+    void beforeEachTestMethod() {
+        calculator = new Calculator();
+        System.out.println("Executing @BeforeEach method!");
+    }
+
+    @AfterEach
+    void afterEachTestMethod() {
+        System.out.println("Executing @AfterEach method!");
+    }
+
     //test<System under test or method under test>_<Condition or state change>_<Expected result>
     @DisplayName("Test 4 / 2 = 2")
     @Test
     void testIntegerDivision_WhenFourDividedByTwo_ShouldReturnTwo() {
-        //AAA
+        System.out.println("Running Test 4 / 2 = 2");
+        // AAA
 
-        //Arrange
-        Calculator calculator = new Calculator();
+        // Arrange // Given
         int dividend = 4;
         int division = 2;
-        int result = 4 - 2;
+        int expectedResult = 4 - 2;
 
-        //Act
+        // Act // When
         int actualResult = calculator.integerDivision(dividend, division);
 
-        //Assert
-        assertEquals(result, actualResult, () -> String.format("%d / %d should have returned %d",
-                dividend, division, result));
+        // Assert // Then
+        assertEquals(expectedResult, actualResult, () -> String.format("%d / %d should have returned %d",
+                dividend, division, expectedResult));
     }
 
-    @DisplayName("Division by zero")
+    @DisplayName("Test division by zero")
     @Test
     void testIntegerDivision_WhenDividendDividedByZero_ShouldThrowArithmeticException() {
-        Calculator calculator = new Calculator();
-
+        System.out.println("Running Test division by zero");
         int divedent = 4;
         int division = 0;
     }
 
-    @DisplayName("33 - 1 = 31")
+    @DisplayName("Test 33 - 1 = 31")
     @Test
     void testIntegerSubtraction_WhenValidValueProvided_ShouldReturnExpectedResult() {
-        Calculator calculator = new Calculator();
-
+        System.out.println("Running Test 33 - 1 = 31");
         var minuend = 33;
         var subtrahend = 1;
         var result = minuend - subtrahend;
