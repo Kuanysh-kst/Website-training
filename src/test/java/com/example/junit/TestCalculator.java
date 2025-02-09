@@ -1,8 +1,14 @@
 package com.example.junit;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Test Math operations in Calculator class")
 public class TestCalculator {
@@ -53,8 +59,22 @@ public class TestCalculator {
     @Test
     void testIntegerDivision_WhenDividendDividedByZero_ShouldThrowArithmeticException() {
         System.out.println("Running Test division by zero");
-        int divedent = 4;
+
+        // Arrange
+        int dividend = 4;
         int division = 0;
+        String expectedExceptionMessage = "/ by zero";
+
+        // Act & Assert
+        ArithmeticException actualException = assertThrows(ArithmeticException.class, () -> {
+            // Act
+            calculator.integerDivision(dividend, division);
+        }, "Division by zero should have thrown Arithmetic exception");
+
+        // Assert
+        assertEquals(expectedExceptionMessage, actualException.getMessage(), () ->
+                String.format("Expected %s, but was %s", expectedExceptionMessage, actualException.getMessage())
+        );
     }
 
     @DisplayName("Test 33 - 1 = 31")
@@ -69,5 +89,12 @@ public class TestCalculator {
 
         assertEquals(result, actualResult, () -> String.format("%d - %d should have returned %d",
                 minuend, subtrahend, result));
+    }
+
+    @Disabled("For show how to word Disabled annotation")
+    @DisplayName("Fail test")
+    @Test
+    void testFailMethod() {
+        fail("Always fail!");
     }
 }
