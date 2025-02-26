@@ -1,4 +1,4 @@
-package com.example.junit;
+package com.example.junit.main;
 
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
