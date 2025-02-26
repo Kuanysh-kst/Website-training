@@ -1,4 +1,4 @@
-package com.example.junit.lifecycle.io;
+package com.example.courses.kargopolov.lifecycle.io;
 
 import java.util.Map;
 

@@ -1,4 +1,4 @@
-package com.example.junit.main;
+package com.example.courses.kargopolov.main;
 
 public class Calculator {
     public int integerDivision(int dividend, int division) {

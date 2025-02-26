@@ -1,6 +1,6 @@
-package com.example.junit.lifecycle.service;
+package com.example.courses.kargopolov.lifecycle.service;
 
-import com.example.junit.lifecycle.io.UsersDatabase;
+import com.example.courses.kargopolov.lifecycle.io.UsersDatabase;
 
 import java.util.Map;
 import java.util.UUID;

@@ -1,4 +1,4 @@
-package com.example.junit.main;
+package com.example.courses.kargopolov.main;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.MethodOrderer;
