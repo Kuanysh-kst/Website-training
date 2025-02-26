@@ -2,8 +2,6 @@ package com.example.courses.kargopolov.lifecycle.service;
 
 import com.example.courses.kargopolov.lifecycle.io.UsersDatabase;
 import com.example.courses.kargopolov.lifecycle.io.UsersDatabaseMapImpl;
-import com.example.courses.kargopolov.lifecycle.service.UserService;
-import com.example.courses.kargopolov.lifecycle.service.UserServiceImpl;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
