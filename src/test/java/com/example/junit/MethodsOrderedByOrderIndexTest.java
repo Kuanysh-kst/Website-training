@@ -1,11 +1,16 @@
 package com.example.junit;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MethodsOrderedByOrderIndexTest {
-    StringBuilder completed = new StringBuilder("");
+    StringBuilder completed = new StringBuilder();
 
     @AfterEach
     void afterEach() {
