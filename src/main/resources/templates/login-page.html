@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+    <h2>Sign In</h2>
+    <form id="loginForm">
+        <div class="input-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" required>
+            <span class="error" id="usernameError"></span>
+        </div>
+        <div class="input-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" required>
+            <span class="error" id="passwordError"></span>
+        </div>
+        <button type="submit">Login</button>
+        <span class="error" id="loginError"></span>
+    </form>
+</div>
+
+<script>
+    document.getElementById("loginForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+    const usernameError = document.getElementById("usernameError");
+    const passwordError = document.getElementById("passwordError");
+    const loginError = document.getElementById("loginError");
+
+    let isValid = true;
+
+    if (username.length < 15) {
+        usernameError.textContent = "Логин должен содержать минимум 15 символов";
+        isValid = false;
+    } else {
+        usernameError.textContent = "";
+    }
+
+    if (password.length < 8) {
+        passwordError.textContent = "Пароль должен содержать минимум 8 символов";
+        isValid = false;
+    } else {
+        passwordError.textContent = "";
+    }
+
+    if (!isValid) {
+        return;
+    }
+
+    // Отправляем данные на Spring API
+    try {
+        const response = await fetch("/api/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ username, password })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert("Login successful!");
+            window.location.href = "/dashboard"; // Перенаправление после успешного входа
+        } else {
+            loginError.textContent = result.message || "Ошибка входа!";
+        }
+    } catch (error) {
+        loginError.textContent = "Ошибка соединения с сервером!";
+    }
+});
+</script>
+
+<style>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f4f4f4;
+        font-family: Arial, sans-serif;
+    }
+    .container {
+        width: 350px; /* Увеличиваем ширину формы */
+        min-width: 350px; /* Фиксируем минимальную ширину */
+        background: white;
+        padding:40px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+    .input-group {
+        margin-bottom: 15px;
+    }
+    .input-group label {
+        display: block;
+        margin-bottom: 5px;
+    }
+    .input-group input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    .error {
+        color: red;
+        font-size: 12px;
+        min-height: 16px; /* Резервируем место под ошибку */
+    }
+    button {
+        width: 100%;
+        padding: 10px;
+        background: #007bff;
+        border: none;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+    button:hover {
+        background: #0056b3;
+    }
+</style>
+</body>
+</html>
