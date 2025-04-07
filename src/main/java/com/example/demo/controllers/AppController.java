@@ -38,5 +38,4 @@ public class AppController {
 
         return "User is saved";
     }
-
 }
