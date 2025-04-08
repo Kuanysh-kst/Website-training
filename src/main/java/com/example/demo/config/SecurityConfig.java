@@ -15,6 +15,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -27,19 +32,21 @@ public class SecurityConfig {
     private final LogoutHandler logoutHandler;
     private static final String[] GET_WHITE_LIST_URL = {
             "/welcome",
-            "/hello",
             "/api/v1/demo-controller"
     };
     private static final String[] POST_WHITE_LIST_URL = {
             "/api/v1/auth/**",
-            "/v3/api-docs/**"
+            "/v3/api-docs/**",
+            "/api/new-user"
     };
 
     @Bean
     SecurityFilterChain securityFilterChain(final HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // <=== это нужно
                         .requestMatchers(HttpMethod.GET, GET_WHITE_LIST_URL).permitAll()
                         .requestMatchers(HttpMethod.POST, POST_WHITE_LIST_URL).permitAll()
                         .anyRequest().authenticated()
@@ -51,8 +58,24 @@ public class SecurityConfig {
                         logout.logoutUrl("/api/v1/auth/logout")
                                 .addLogoutHandler(logoutHandler)
                                 .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext()))
-                .formLogin(Customizer.withDefaults())
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .permitAll()
+                        )
                 .httpBasic(Customizer.withDefaults())
                 .build();
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedMethods(List.of("GET","POST", "PUT", "DELETE"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

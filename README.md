@@ -71,4 +71,8 @@ docker-compose down -v
 ## ./gradlew 
 ./gradlew clean test : удаляет build, запускает все тесты.
 
-            
+## Для управления базы из терминала с помощью bash
+psql -U admin -d webtest -h localhost -p 5432
+
+\dt чтобы посмотреть таблицы
+\! clear очистить
