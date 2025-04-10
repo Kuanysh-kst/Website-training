@@ -31,11 +31,4 @@ public class AppController {
     public Application applicationByID(@PathVariable int id) {
         return service.applicationByID(id);
     }
-
-    @PostMapping("/new-user")
-    public String addUser(@RequestBody MyUser user) {
-        service.addUser(user);
-
-        return "User is saved";
-    }
 }

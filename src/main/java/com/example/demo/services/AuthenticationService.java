@@ -3,6 +3,7 @@ package com.example.demo.services;
 import com.example.demo.auth.AuthenticationRequest;
 import com.example.demo.auth.AuthenticationResponse;
 import com.example.demo.auth.RegisterRequest;
+import com.example.demo.exceptions.EmailAlreadyExistsException;
 import com.example.demo.models.MyUser;
 import com.example.demo.repositories.MyUserRepository;
 import com.example.demo.config.JwtService;
@@ -13,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
@@ -32,6 +35,12 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(RegisterRequest request) {
+        if(repository.findByEmail(request.getEmail()).isPresent()) {
+            throw new EmailAlreadyExistsException("Email is already in use");
+        }
+
+        log.info("Registering new user with email: {}", request.getEmail());
+
         var user = MyUser.builder()
                 .firstname(request.getFirstname())
                 .lastname(request.getLastname())
