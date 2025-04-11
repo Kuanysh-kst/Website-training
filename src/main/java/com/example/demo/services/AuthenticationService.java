@@ -3,6 +3,7 @@ package com.example.demo.services;
 import com.example.demo.auth.AuthenticationRequest;
 import com.example.demo.auth.AuthenticationResponse;
 import com.example.demo.auth.RegisterRequest;
+import com.example.demo.exceptions.CustomValidationException;
 import com.example.demo.models.MyUser;
 import com.example.demo.repositories.MyUserRepository;
 import com.example.demo.config.JwtService;
@@ -13,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,7 +22,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
@@ -32,6 +39,33 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(RegisterRequest request) {
+        Map<String, List<String>> errors = new HashMap<>();
+        if (request.getFirstname() == null || request.getFirstname().isBlank()) {
+            errors.computeIfAbsent("firstname", k -> new ArrayList<>()).add("The first name field is required.");
+        }
+
+        if (request.getFirstname() == null || request.getLastname().isBlank()) {
+            errors.computeIfAbsent("lastname", k -> new ArrayList<>()).add("The last name field is required.");
+        }
+
+        if (request.getEmail() == null || request.getEmail().isBlank()) {
+            errors.computeIfAbsent("email", k -> new ArrayList<>()).add("The email field is required.");
+        } else if (!request.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            errors.computeIfAbsent("email", k -> new ArrayList<>()).add("The email must be a valid email address.");
+        } else if (repository.findByEmail(request.getEmail()).isPresent()) {
+            errors.computeIfAbsent("email", k -> new ArrayList<>()).add("Email is already in use");
+        }
+
+        if (request.getPassword() == null || request.getPassword().length() < 8) {
+            errors.computeIfAbsent("password", k -> new ArrayList<>()).add("The password must be at least 8 characters.");
+        }
+
+        if (!errors.isEmpty()) {
+            throw new CustomValidationException(errors);
+        }
+
+        log.info("Registering new user with email: {}", request.getEmail());
+
         var user = MyUser.builder()
                 .firstname(request.getFirstname())
                 .lastname(request.getLastname())

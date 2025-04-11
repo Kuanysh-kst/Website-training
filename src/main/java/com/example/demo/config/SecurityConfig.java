@@ -36,8 +36,7 @@ public class SecurityConfig {
     };
     private static final String[] POST_WHITE_LIST_URL = {
             "/api/v1/auth/**",
-            "/v3/api-docs/**",
-            "/api/new-user"
+            "/v3/api-docs/**"
     };
 
     @Bean
