@@ -42,6 +42,13 @@ public class MyUser implements UserDetails {
 
     private String email;
 
+    private String verificationToken;
+
+    private boolean isVerified;
+
+    @Column(name = "reset_token")
+    private String resetToken;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 
