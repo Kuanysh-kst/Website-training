@@ -3,8 +3,8 @@ package com.example.demo.services;
 import com.example.demo.auth.AuthenticationRequest;
 import com.example.demo.auth.AuthenticationResponse;
 import com.example.demo.auth.RegisterRequest;
-import com.example.demo.config.EmailConfig;
-import com.example.demo.exceptions.CustomValidationException;
+import com.example.demo.dto.VerifyUserDto;
+import com.example.demo.exceptions.SignUpException;
 import com.example.demo.models.MyUser;
 import com.example.demo.repositories.MyUserRepository;
 import com.example.demo.config.JwtService;
@@ -25,7 +25,12 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
 
 @Slf4j
 @Service
@@ -37,8 +42,9 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final EmailService emailService;
 
-    public AuthenticationResponse register(RegisterRequest request) {
+    public AuthenticationResponse signup(RegisterRequest request) {
         Map<String, List<String>> errors = new HashMap<>();
         if (request.getFirstname() == null || request.getFirstname().isBlank()) {
             errors.computeIfAbsent("firstname", k -> new ArrayList<>()).add("The first name field is required.");
@@ -61,7 +67,7 @@ public class AuthenticationService {
         }
 
         if (!errors.isEmpty()) {
-            throw new CustomValidationException(errors);
+            throw new SignUpException(errors);
         }
 
         log.info("Registering new user with email: {}", request.getEmail());
@@ -72,7 +78,12 @@ public class AuthenticationService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
+                .verificationCode(generateVerificationCode())
+                .verificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15))
+                .enabled(false)
                 .build();
+
+        sendVerificationEmail(user);
 
         var savedUser = repository.save(user);
         var jwtToken = jwtService.generateToken(user);
@@ -158,5 +169,57 @@ public class AuthenticationService {
                 new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
             }
         }
+    }
+
+    private void sendVerificationEmail(MyUser user) { //TODO: Update with company logo
+        String subject = "Account Verification";
+        String verificationCode = "VERIFICATION CODE " + user.getVerificationCode();
+        String htmlMessage = "<html>"
+                + "<body style=\"font-family: Arial, sans-serif;\">"
+                + "<div style=\"background-color: #f5f5f5; padding: 20px;\">"
+                + "<h2 style=\"color: #333;\">Welcome to our app!</h2>"
+                + "<p style=\"font-size: 16px;\">Please enter the verification code below to continue:</p>"
+                + "<div style=\"background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1);\">"
+                + "<h3 style=\"color: #333;\">Verification Code:</h3>"
+                + "<p style=\"font-size: 18px; font-weight: bold; color: #007bff;\">" + verificationCode + "</p>"
+                + "</div>"
+                + "</div>"
+                + "</body>"
+                + "</html>";
+
+        try {
+            emailService.sendVerificationEmail(user.getEmail(), subject, htmlMessage);
+        } catch (MessagingException cause) {
+            log.error("The MessagingException occurred while sending the message: {}", cause.getMessage());
+        } catch (Exception cause) {
+            log.error("The Exception occurred while sending the message: {}", cause.getMessage());
+        }
+    }
+
+    private String generateVerificationCode() {
+        Random random = new Random();
+        int code = random.nextInt(900000) + 100000;
+        return String.valueOf(code);
+    }
+
+    public String verifyUser(VerifyUserDto input) {
+        Optional<MyUser> optionalUser = repository.findByEmail(input.getEmail());
+        if (optionalUser.isPresent()) {
+            MyUser user = optionalUser.get();
+            if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
+                throw new RuntimeException("Verification code has expired");
+            }
+            if (user.getVerificationCode().equals(input.getVerificationCode())) {
+                user.setEnabled(true);
+                user.setVerificationCode(null);
+                user.setVerificationCodeExpiresAt(null);
+                repository.save(user);
+            } else {
+                throw new RuntimeException("Invalid verification code");
+            }
+        } else {
+            throw new RuntimeException("User not found");
+        }
+        return  "Account verified successfully";
     }
 }

@@ -2,6 +2,7 @@ package com.example.demo.controllers;
 
 import com.example.demo.auth.AuthenticationRequest;
 import com.example.demo.auth.AuthenticationResponse;
+import com.example.demo.dto.VerifyUserDto;
 import com.example.demo.services.AuthenticationService;
 import com.example.demo.auth.RegisterRequest;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,9 +23,15 @@ public class AuthenticationController {
 
     private final AuthenticationService service;
 
-    @PostMapping("/register")
+    //TODO сделать документацию через swagger
+    @PostMapping("/signup")
     public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
-        return ResponseEntity.ok(service.register(request));
+        return ResponseEntity.ok(service.signup(request));
+    }
+
+    @PostMapping("/verify")
+    public ResponseEntity<?> verifyUser(@RequestBody VerifyUserDto verifyUserDto) {
+        return ResponseEntity.ok(service.verifyUser(verifyUserDto));
     }
 
     @PostMapping("/authenticate")
