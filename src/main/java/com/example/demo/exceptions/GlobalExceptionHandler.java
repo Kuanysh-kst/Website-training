@@ -12,12 +12,12 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({CustomValidationException.class})
+    @ExceptionHandler({ValidationException.class})
     public ResponseEntity<ApiErrorResponse> handleValidationAndBusinessErrors(Exception ex) {
         Map<String, List<String>> errors = new HashMap<>();
 
-        if (ex instanceof CustomValidationException) {
-            errors = ((CustomValidationException) ex).getErrors();
+        if (ex instanceof ValidationException) {
+            errors = ((ValidationException) ex).getErrors();
         }
         // Создаем единый формат ответа для всех ошибок
         ApiErrorResponse response = new ApiErrorResponse(

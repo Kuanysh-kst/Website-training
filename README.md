@@ -76,3 +76,7 @@ psql -U admin -d webtest -h localhost -p 5432
 
 \dt чтобы посмотреть таблицы
 \! clear очистить
+
+команды для отображения таблиц
+select * from users;
+select id, email,  verification_code, verification_expiration, enabled from users;

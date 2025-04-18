@@ -3,14 +3,19 @@ package com.example.demo.services;
 import com.example.demo.auth.AuthenticationRequest;
 import com.example.demo.auth.AuthenticationResponse;
 import com.example.demo.auth.RegisterRequest;
-import com.example.demo.exceptions.CustomValidationException;
+import com.example.demo.dto.VerifyUserDto;
+import com.example.demo.exceptions.ValidationException;
 import com.example.demo.models.MyUser;
 import com.example.demo.repositories.MyUserRepository;
 import com.example.demo.config.JwtService;
 import com.example.demo.token.Token;
 import com.example.demo.token.TokenRepository;
 import com.example.demo.token.TokenType;
+import com.example.demo.util.CodeGenerator;
+import com.example.demo.util.EmailTemplateBuilder;
+import com.example.demo.validation.RequestValidator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -22,10 +27,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -37,32 +43,11 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final EmailService emailService;
+    private final RequestValidator validator;
 
-    public AuthenticationResponse register(RegisterRequest request) {
-        Map<String, List<String>> errors = new HashMap<>();
-        if (request.getFirstname() == null || request.getFirstname().isBlank()) {
-            errors.computeIfAbsent("firstname", k -> new ArrayList<>()).add("The first name field is required.");
-        }
-
-        if (request.getFirstname() == null || request.getLastname().isBlank()) {
-            errors.computeIfAbsent("lastname", k -> new ArrayList<>()).add("The last name field is required.");
-        }
-
-        if (request.getEmail() == null || request.getEmail().isBlank()) {
-            errors.computeIfAbsent("email", k -> new ArrayList<>()).add("The email field is required.");
-        } else if (!request.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            errors.computeIfAbsent("email", k -> new ArrayList<>()).add("The email must be a valid email address.");
-        } else if (repository.findByEmail(request.getEmail()).isPresent()) {
-            errors.computeIfAbsent("email", k -> new ArrayList<>()).add("Email is already in use");
-        }
-
-        if (request.getPassword() == null || request.getPassword().length() < 8) {
-            errors.computeIfAbsent("password", k -> new ArrayList<>()).add("The password must be at least 8 characters.");
-        }
-
-        if (!errors.isEmpty()) {
-            throw new CustomValidationException(errors);
-        }
+    public AuthenticationResponse signup(RegisterRequest request) {
+        validator.signUpValidate(request);
 
         log.info("Registering new user with email: {}", request.getEmail());
 
@@ -72,7 +57,12 @@ public class AuthenticationService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
+                .verificationCode(CodeGenerator.generateVerificationCode())
+                .verificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15))
+                .enabled(false)
                 .build();
+
+        sendVerificationEmail(user);
 
         var savedUser = repository.save(user);
         var jwtToken = jwtService.generateToken(user);
@@ -158,5 +148,50 @@ public class AuthenticationService {
                 new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
             }
         }
+    }
+
+    private void sendVerificationEmail(MyUser user) { //TODO: Update with company logo
+        String subject = "Account Verification";
+        String verificationCode = "VERIFICATION CODE " + user.getVerificationCode();
+        String htmlMessage = EmailTemplateBuilder.buildVerificationEmail(verificationCode);
+
+        try {
+            emailService.sendVerificationEmail(user.getEmail(), subject, htmlMessage);
+        } catch (MessagingException cause) {
+            log.error("The MessagingException occurred while sending the message: {}", cause.getMessage());
+        } catch (Exception cause) {
+            log.error("The Exception occurred while sending the message: {}", cause.getMessage());
+        }
+    }
+
+    public Map<String, Object> verifyUser(VerifyUserDto input) {
+        Optional<MyUser> optionalUser = repository.findByEmail(input.getEmail());
+        Map<String, List<String>> errors = new HashMap<>();
+
+        if (optionalUser.isEmpty()) {
+            errors.put("email", List.of("User not found"));
+            throw new ValidationException(errors);
+        }
+
+        MyUser user = optionalUser.get();
+
+        if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
+            errors.put("verificationCode", List.of("Verification code has expired"));
+            throw new ValidationException(errors);
+        } else if (!user.getVerificationCode().equals(input.getVerificationCode())) {
+            errors.put("verificationCode", List.of("Invalid verification code"));
+            throw new ValidationException(errors);
+        }
+
+        user.setEnabled(true);
+        user.setVerificationCode(null);
+        user.setVerificationCodeExpiresAt(null);
+        repository.save(user);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("messages", Map.of("success", List.of("Account verified successfully")));
+        response.put("status", "success");
+        response.put("code", 200);
+        return response;
     }
 }
