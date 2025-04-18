@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 @Getter
-public class SignUpException extends RuntimeException {
+public class ValidationException extends RuntimeException {
     private final Map<String, List<String>> errors;
 
-    public SignUpException(Map<String, List<String>> errors) {
+    public ValidationException(Map<String, List<String>> errors) {
         super(buildErrorMessage(errors));
         this.errors = errors;
     }

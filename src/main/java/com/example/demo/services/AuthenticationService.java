@@ -4,6 +4,7 @@ import com.example.demo.auth.AuthenticationRequest;
 import com.example.demo.auth.AuthenticationResponse;
 import com.example.demo.auth.RegisterRequest;
 import com.example.demo.dto.VerifyUserDto;
+import com.example.demo.exceptions.ValidationException;
 import com.example.demo.models.MyUser;
 import com.example.demo.repositories.MyUserRepository;
 import com.example.demo.config.JwtService;
@@ -12,7 +13,7 @@ import com.example.demo.token.TokenRepository;
 import com.example.demo.token.TokenType;
 import com.example.demo.util.CodeGenerator;
 import com.example.demo.util.EmailTemplateBuilder;
-import com.example.demo.validation.SignUpRequestValidator;
+import com.example.demo.validation.RequestValidator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +28,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -40,10 +44,10 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
-    private final SignUpRequestValidator validator;
+    private final RequestValidator validator;
 
     public AuthenticationResponse signup(RegisterRequest request) {
-        validator.validate(request);
+        validator.signUpValidate(request);
 
         log.info("Registering new user with email: {}", request.getEmail());
 
@@ -160,24 +164,34 @@ public class AuthenticationService {
         }
     }
 
-    public String verifyUser(VerifyUserDto input) {
+    public Map<String, Object> verifyUser(VerifyUserDto input) {
         Optional<MyUser> optionalUser = repository.findByEmail(input.getEmail());
-        if (optionalUser.isPresent()) {
-            MyUser user = optionalUser.get();
-            if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
-                throw new RuntimeException("Verification code has expired");
-            }
-            if (user.getVerificationCode().equals(input.getVerificationCode())) {
-                user.setEnabled(true);
-                user.setVerificationCode(null);
-                user.setVerificationCodeExpiresAt(null);
-                repository.save(user);
-            } else {
-                throw new RuntimeException("Invalid verification code");
-            }
-        } else {
-            throw new RuntimeException("User not found");
+        Map<String, List<String>> errors = new HashMap<>();
+
+        if (optionalUser.isEmpty()) {
+            errors.put("email", List.of("User not found"));
+            throw new ValidationException(errors);
         }
-        return  "Account verified successfully";
+
+        MyUser user = optionalUser.get();
+
+        if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
+            errors.put("verificationCode", List.of("Verification code has expired"));
+            throw new ValidationException(errors);
+        } else if (!user.getVerificationCode().equals(input.getVerificationCode())) {
+            errors.put("verificationCode", List.of("Invalid verification code"));
+            throw new ValidationException(errors);
+        }
+
+        user.setEnabled(true);
+        user.setVerificationCode(null);
+        user.setVerificationCodeExpiresAt(null);
+        repository.save(user);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("messages", Map.of("success", List.of("Account verified successfully")));
+        response.put("status", "success");
+        response.put("code", 200);
+        return response;
     }
 }

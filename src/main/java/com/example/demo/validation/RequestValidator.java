@@ -1,7 +1,7 @@
 package com.example.demo.validation;
 
 import com.example.demo.auth.RegisterRequest;
-import com.example.demo.exceptions.SignUpException;
+import com.example.demo.exceptions.ValidationException;
 import com.example.demo.repositories.MyUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -13,11 +13,11 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-public class SignUpRequestValidator {
+public class RequestValidator {
 
     private final MyUserRepository repository;
 
-    public void validate(RegisterRequest request) {
+    public void signUpValidate(RegisterRequest request) {
         Map<String, List<String>> errors = new HashMap<>();
 
         if (isBlank(request.getFirstname())) {
@@ -45,7 +45,7 @@ public class SignUpRequestValidator {
         }
 
         if (!errors.isEmpty()) {
-            throw new SignUpException(errors);
+            throw new ValidationException(errors);
         }
     }
 
@@ -56,4 +56,5 @@ public class SignUpRequestValidator {
     private void addError(Map<String, List<String>> errors, String field, String message) {
         errors.computeIfAbsent(field, k -> new ArrayList<>()).add(message);
     }
+
 }
