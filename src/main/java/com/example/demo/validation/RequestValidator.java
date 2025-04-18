@@ -1,6 +1,6 @@
 package com.example.demo.validation;
 
-import com.example.demo.auth.RegisterRequest;
+import com.example.demo.dto.request.SignUpRequest;
 import com.example.demo.exceptions.ValidationException;
 import com.example.demo.repositories.MyUserRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ public class RequestValidator {
 
     private final MyUserRepository repository;
 
-    public void signUpValidate(RegisterRequest request) {
+    public void signUpValidate(SignUpRequest request) {
         Map<String, List<String>> errors = new HashMap<>();
 
         if (isBlank(request.getFirstname())) {

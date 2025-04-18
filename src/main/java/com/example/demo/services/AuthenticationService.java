@@ -1,9 +1,9 @@
 package com.example.demo.services;
 
-import com.example.demo.auth.AuthenticationRequest;
-import com.example.demo.auth.AuthenticationResponse;
-import com.example.demo.auth.RegisterRequest;
-import com.example.demo.dto.VerifyUserDto;
+import com.example.demo.dto.request.AuthenticationRequest;
+import com.example.demo.dto.response.AuthenticationResponse;
+import com.example.demo.dto.request.SignUpRequest;
+import com.example.demo.dto.request.VerifyUserRequest;
 import com.example.demo.exceptions.ValidationException;
 import com.example.demo.models.MyUser;
 import com.example.demo.repositories.MyUserRepository;
@@ -46,7 +46,7 @@ public class AuthenticationService {
     private final EmailService emailService;
     private final RequestValidator validator;
 
-    public AuthenticationResponse signup(RegisterRequest request) {
+    public AuthenticationResponse signup(SignUpRequest request) {
         validator.signUpValidate(request);
 
         log.info("Registering new user with email: {}", request.getEmail());
@@ -164,7 +164,7 @@ public class AuthenticationService {
         }
     }
 
-    public Map<String, Object> verifyUser(VerifyUserDto input) {
+    public Map<String, Object> verifyUser(VerifyUserRequest input) {
         Optional<MyUser> optionalUser = repository.findByEmail(input.getEmail());
         Map<String, List<String>> errors = new HashMap<>();
 
@@ -190,6 +190,34 @@ public class AuthenticationService {
 
         Map<String, Object> response = new HashMap<>();
         response.put("messages", Map.of("success", List.of("Account verified successfully")));
+        response.put("status", "success");
+        response.put("code", 200);
+        return response;
+    }
+
+    public Map<String, Object> resendVerificationCode(String email) {
+        Optional<MyUser> optionalUser = repository.findByEmail(email);
+        Map<String, List<String>> errors = new HashMap<>();
+
+        if (optionalUser.isEmpty()) {
+            errors.put("email", List.of("User not found"));
+            throw new ValidationException(errors);
+        }
+
+        MyUser user = optionalUser.get();
+
+        if (user.isEnabled()) {
+            errors.put("email", List.of("Account is already verified"));
+            throw new ValidationException(errors);
+        }
+
+        user.setVerificationCode(CodeGenerator.generateVerificationCode());
+        user.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
+        sendVerificationEmail(user);
+        repository.save(user);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("messages", Map.of("success", List.of("Verification code sent successfully")));
         response.put("status", "success");
         response.put("code", 200);
         return response;

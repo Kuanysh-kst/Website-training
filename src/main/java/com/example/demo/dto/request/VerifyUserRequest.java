@@ -1,9 +1,9 @@
-package com.example.demo.dto;
+package com.example.demo.dto.request;
 
 import lombok.Data;
 
 @Data
-public class VerifyUserDto {
+public class VerifyUserRequest {
     private String email;
     private String verificationCode;
 }
