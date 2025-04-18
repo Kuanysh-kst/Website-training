@@ -4,7 +4,6 @@ import com.example.demo.auth.AuthenticationRequest;
 import com.example.demo.auth.AuthenticationResponse;
 import com.example.demo.auth.RegisterRequest;
 import com.example.demo.dto.VerifyUserDto;
-import com.example.demo.exceptions.SignUpException;
 import com.example.demo.models.MyUser;
 import com.example.demo.repositories.MyUserRepository;
 import com.example.demo.config.JwtService;
@@ -13,6 +12,7 @@ import com.example.demo.token.TokenRepository;
 import com.example.demo.token.TokenType;
 import com.example.demo.util.CodeGenerator;
 import com.example.demo.util.EmailTemplateBuilder;
+import com.example.demo.validation.SignUpRequestValidator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,12 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
 @Slf4j
 @Service
@@ -45,32 +40,10 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
+    private final SignUpRequestValidator validator;
 
     public AuthenticationResponse signup(RegisterRequest request) {
-        Map<String, List<String>> errors = new HashMap<>();
-        if (request.getFirstname() == null || request.getFirstname().isBlank()) {
-            errors.computeIfAbsent("firstname", k -> new ArrayList<>()).add("The first name field is required.");
-        }
-
-        if (request.getFirstname() == null || request.getLastname().isBlank()) {
-            errors.computeIfAbsent("lastname", k -> new ArrayList<>()).add("The last name field is required.");
-        }
-
-        if (request.getEmail() == null || request.getEmail().isBlank()) {
-            errors.computeIfAbsent("email", k -> new ArrayList<>()).add("The email field is required.");
-        } else if (!request.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            errors.computeIfAbsent("email", k -> new ArrayList<>()).add("The email must be a valid email address.");
-        } else if (repository.findByEmail(request.getEmail()).isPresent()) {
-            errors.computeIfAbsent("email", k -> new ArrayList<>()).add("Email is already in use");
-        }
-
-        if (request.getPassword() == null || request.getPassword().length() < 8) {
-            errors.computeIfAbsent("password", k -> new ArrayList<>()).add("The password must be at least 8 characters.");
-        }
-
-        if (!errors.isEmpty()) {
-            throw new SignUpException(errors);
-        }
+        validator.validate(request);
 
         log.info("Registering new user with email: {}", request.getEmail());
 
