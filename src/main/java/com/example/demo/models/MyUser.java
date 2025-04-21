@@ -1,6 +1,6 @@
 package com.example.demo.models;
 
-import com.example.demo.token.Token;
+import com.example.demo.enums.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -76,5 +76,10 @@ public class MyUser implements UserDetails {
     @Override
     public String getUsername() {
         return email;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.enabled;
     }
 }

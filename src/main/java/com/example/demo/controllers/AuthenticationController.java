@@ -1,10 +1,11 @@
 package com.example.demo.controllers;
 
-import com.example.demo.auth.AuthenticationRequest;
-import com.example.demo.auth.AuthenticationResponse;
-import com.example.demo.dto.VerifyUserDto;
+import com.example.demo.dto.request.AuthenticationRequest;
+import com.example.demo.dto.request.ResendVerificationCodeRequest;
+import com.example.demo.dto.response.AuthenticationResponse;
+import com.example.demo.dto.request.VerifyUserRequest;
 import com.example.demo.services.AuthenticationService;
-import com.example.demo.auth.RegisterRequest;
+import com.example.demo.dto.request.SignUpRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -25,18 +26,23 @@ public class AuthenticationController {
 
     //TODO сделать документацию через swagger
     @PostMapping("/signup")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
-        return ResponseEntity.ok(service.signup(request));
+    public ResponseEntity<AuthenticationResponse> register(@RequestBody SignUpRequest sign) {
+        return ResponseEntity.ok(service.signup(sign));
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<?> verifyUser(@RequestBody VerifyUserDto verifyUserDto) {
+    public ResponseEntity<?> verifyUser(@RequestBody VerifyUserRequest verifyUserDto) {
         return ResponseEntity.ok(service.verifyUser(verifyUserDto));
     }
 
+    @PostMapping("/resend")
+    public ResponseEntity<?> resendVerificationCode(@RequestBody ResendVerificationCodeRequest resend) {
+        return ResponseEntity.ok(service.resendVerificationCode(resend));
+    }
+
     @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
-        return ResponseEntity.ok(service.authenticate(request));
+    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest authentication) {
+        return ResponseEntity.ok(service.authenticate(authentication));
     }
 
     @PostMapping("/refresh-token")

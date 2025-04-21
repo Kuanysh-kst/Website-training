@@ -2,7 +2,8 @@ package com.example.demo.util;
 
 public class EmailTemplateBuilder {
 
-    private EmailTemplateBuilder() {}
+    private EmailTemplateBuilder() {
+    }
 
     public static String buildVerificationEmail(String code) {
         return "<html>"

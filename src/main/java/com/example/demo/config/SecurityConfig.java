@@ -32,8 +32,7 @@ public class SecurityConfig {
     private final LogoutHandler logoutHandler;
     private static final String[] GET_WHITE_LIST_URL = {
             "/welcome",
-            "/api/v1/demo-controller",
-            "/send-mail"
+            "/api/v1/demo-controller"
     };
     private static final String[] POST_WHITE_LIST_URL = {
             "/api/v1/auth/**",
@@ -61,7 +60,7 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login")
                         .permitAll()
-                        )
+                )
                 .httpBasic(Customizer.withDefaults())
                 .build();
     }
@@ -70,7 +69,7 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-        configuration.setAllowedMethods(List.of("GET","POST", "PUT", "DELETE"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 

@@ -1,6 +1,6 @@
 package com.example.demo.config;
 
-import com.example.demo.token.TokenRepository;
+import com.example.demo.repositories.TokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -51,7 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
             var isTokenValid = tokenRepository.findByToken(jwt)
-                    .map(t-> !t.isExpired() && !t.isRevoked())
+                    .map(t -> !t.isExpired() && !t.isRevoked())
                     .orElse(false);
 
             if (jwtService.isTokenValid(jwt, userDetails) && isTokenValid) {

@@ -1,20 +1,14 @@
-package com.example.demo.exceptions;
+package com.example.demo.util;
 
-import lombok.Getter;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@Getter
-public class ValidationException extends RuntimeException {
-    private final Map<String, List<String>> errors;
-
-    public ValidationException(Map<String, List<String>> errors) {
-        super(buildErrorMessage(errors));
-        this.errors = errors;
+public class ErrorUtils {
+    private ErrorUtils() {
     }
 
-    private static String buildErrorMessage(Map<String, List<String>> errors) {
+    public static String buildErrorMessage(Map<String, List<String>> errors) {
         StringBuilder messageBuilder = new StringBuilder("Validation failed:");
 
         errors.forEach((field, fieldErrors) ->
@@ -24,5 +18,9 @@ public class ValidationException extends RuntimeException {
         );
 
         return messageBuilder.toString();
+    }
+
+    public static void addError(Map<String, List<String>> errors, String field, String message) {
+        errors.computeIfAbsent(field, k -> new ArrayList<>()).add(message);
     }
 }
