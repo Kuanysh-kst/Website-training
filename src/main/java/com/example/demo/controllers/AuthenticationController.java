@@ -1,6 +1,7 @@
 package com.example.demo.controllers;
 
 import com.example.demo.dto.request.AuthenticationRequest;
+import com.example.demo.dto.request.ResendVerificationCodeRequest;
 import com.example.demo.dto.response.AuthenticationResponse;
 import com.example.demo.dto.request.VerifyUserRequest;
 import com.example.demo.services.AuthenticationService;
@@ -12,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
@@ -26,8 +26,8 @@ public class AuthenticationController {
 
     //TODO сделать документацию через swagger
     @PostMapping("/signup")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody SignUpRequest request) {
-        return ResponseEntity.ok(service.signup(request));
+    public ResponseEntity<AuthenticationResponse> register(@RequestBody SignUpRequest sign) {
+        return ResponseEntity.ok(service.signup(sign));
     }
 
     @PostMapping("/verify")
@@ -36,13 +36,13 @@ public class AuthenticationController {
     }
 
     @PostMapping("/resend")
-    public ResponseEntity<?>  resendVerificationCode(@RequestParam String email) {
-        return ResponseEntity.ok(service.resendVerificationCode(email));
+    public ResponseEntity<?>  resendVerificationCode(@RequestBody ResendVerificationCodeRequest resend) {
+        return ResponseEntity.ok(service.resendVerificationCode(resend));
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
-        return ResponseEntity.ok(service.authenticate(request));
+    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest authentication) {
+        return ResponseEntity.ok(service.authenticate(authentication));
     }
 
     @PostMapping("/refresh-token")

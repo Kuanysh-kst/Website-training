@@ -32,8 +32,7 @@ public class SecurityConfig {
     private final LogoutHandler logoutHandler;
     private static final String[] GET_WHITE_LIST_URL = {
             "/welcome",
-            "/api/v1/demo-controller",
-            "/send-mail"
+            "/api/v1/demo-controller"
     };
     private static final String[] POST_WHITE_LIST_URL = {
             "/api/v1/auth/**",

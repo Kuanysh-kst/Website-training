@@ -5,27 +5,35 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({ValidationException.class})
-    public ResponseEntity<ApiErrorResponse> handleValidationAndBusinessErrors(Exception ex) {
-        Map<String, List<String>> errors = new HashMap<>();
+    @ExceptionHandler({SignUpException.class})
+    public ResponseEntity<ApiErrorResponse> handleValidationAndBusinessErrors(SignUpException ex) {
+        Map<String, List<String>> errors;
+        errors = ex.getErrors();
 
-        if (ex instanceof ValidationException) {
-            errors = ((ValidationException) ex).getErrors();
-        }
-        // Создаем единый формат ответа для всех ошибок
-        ApiErrorResponse response = new ApiErrorResponse(
-                errors,
+        ApiErrorResponse response = new ApiErrorResponse(errors,
                 "error",
                 HttpStatus.UNPROCESSABLE_ENTITY.value()
         );
 
         return ResponseEntity.unprocessableEntity().body(response);
+    }
+
+    @ExceptionHandler({AuthenticationFailedException.class})
+    public ResponseEntity<ApiErrorResponse> handleAuthenticationFailedErrors(AuthenticationFailedException exception) {
+        Map<String, List<String>> errors;
+        errors = exception.getErrors();
+
+        ApiErrorResponse response = new ApiErrorResponse(errors,
+                "error",
+                HttpStatus.UNAUTHORIZED.value()
+        );
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 }

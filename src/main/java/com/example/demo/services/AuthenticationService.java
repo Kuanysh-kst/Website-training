@@ -1,10 +1,12 @@
 package com.example.demo.services;
 
 import com.example.demo.dto.request.AuthenticationRequest;
+import com.example.demo.dto.request.ResendVerificationCodeRequest;
 import com.example.demo.dto.response.AuthenticationResponse;
 import com.example.demo.dto.request.SignUpRequest;
 import com.example.demo.dto.request.VerifyUserRequest;
-import com.example.demo.exceptions.ValidationException;
+import com.example.demo.exceptions.AuthenticationFailedException;
+import com.example.demo.exceptions.SignUpException;
 import com.example.demo.models.MyUser;
 import com.example.demo.repositories.MyUserRepository;
 import com.example.demo.config.JwtService;
@@ -13,6 +15,7 @@ import com.example.demo.repositories.TokenRepository;
 import com.example.demo.enums.TokenType;
 import com.example.demo.util.CodeGenerator;
 import com.example.demo.util.EmailTemplateBuilder;
+import com.example.demo.util.ErrorUtils;
 import com.example.demo.validation.RequestValidator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.MessagingException;
@@ -22,7 +25,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -75,12 +81,26 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
+        Map<String, List<String>> errors = new HashMap<>();
+
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()
+                    )
+            );
+        } catch (AuthenticationException exception) {
+            if (exception instanceof DisabledException) {
+                ErrorUtils.addError(errors, "code", "Account is inactive. Please verify your email.");
+            } else if (exception instanceof BadCredentialsException) {
+                ErrorUtils.addError(errors, "credentials", "Invalid email or password.");
+            } else {
+                ErrorUtils.addError(errors, "auth", "An authentication error occurred. Please try again later.");
+            }
+
+            throw new AuthenticationFailedException(errors);
+        }
 
         var user = repository.findByEmail(request.getEmail())
                 .orElseThrow();
@@ -170,17 +190,17 @@ public class AuthenticationService {
 
         if (optionalUser.isEmpty()) {
             errors.put("email", List.of("User not found"));
-            throw new ValidationException(errors);
+            throw new SignUpException(errors);
         }
 
         MyUser user = optionalUser.get();
 
         if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
             errors.put("verificationCode", List.of("Verification code has expired"));
-            throw new ValidationException(errors);
+            throw new SignUpException(errors);
         } else if (!user.getVerificationCode().equals(input.getVerificationCode())) {
             errors.put("verificationCode", List.of("Invalid verification code"));
-            throw new ValidationException(errors);
+            throw new SignUpException(errors);
         }
 
         user.setEnabled(true);
@@ -195,20 +215,20 @@ public class AuthenticationService {
         return response;
     }
 
-    public Map<String, Object> resendVerificationCode(String email) {
-        Optional<MyUser> optionalUser = repository.findByEmail(email);
+    public Map<String, Object> resendVerificationCode(ResendVerificationCodeRequest input) {
+        Optional<MyUser> optionalUser = repository.findByEmail(input.getEmail());
         Map<String, List<String>> errors = new HashMap<>();
 
         if (optionalUser.isEmpty()) {
             errors.put("email", List.of("User not found"));
-            throw new ValidationException(errors);
+            throw new SignUpException(errors);
         }
 
         MyUser user = optionalUser.get();
 
         if (user.isEnabled()) {
             errors.put("email", List.of("Account is already verified"));
-            throw new ValidationException(errors);
+            throw new SignUpException(errors);
         }
 
         user.setVerificationCode(CodeGenerator.generateVerificationCode());
