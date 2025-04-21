@@ -5,7 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 public class ErrorUtils {
-    private ErrorUtils() {}
+    private ErrorUtils() {
+    }
 
     public static String buildErrorMessage(Map<String, List<String>> errors) {
         StringBuilder messageBuilder = new StringBuilder("Validation failed:");

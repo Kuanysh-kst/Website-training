@@ -36,7 +36,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/resend")
-    public ResponseEntity<?>  resendVerificationCode(@RequestBody ResendVerificationCodeRequest resend) {
+    public ResponseEntity<?> resendVerificationCode(@RequestBody ResendVerificationCodeRequest resend) {
         return ResponseEntity.ok(service.resendVerificationCode(resend));
     }
 

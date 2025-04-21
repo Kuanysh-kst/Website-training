@@ -3,7 +3,8 @@ package com.example.demo.util;
 import java.util.Random;
 
 public class CodeGenerator {
-    private CodeGenerator() {}
+    private CodeGenerator() {
+    }
 
     public static String generateVerificationCode() {
         Random random = new Random();
