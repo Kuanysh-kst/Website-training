@@ -189,7 +189,7 @@ public class AuthenticationService {
         Map<String, List<String>> errors = new HashMap<>();
 
         if (optionalUser.isEmpty()) {
-            errors.put("email", List.of("User not found"));
+            errors.put("email", List.of("User not found, user email: " + input.getEmail()));
             throw new SignUpException(errors);
         }
 
@@ -199,7 +199,9 @@ public class AuthenticationService {
             errors.put("verificationCode", List.of("Verification code has expired"));
             throw new SignUpException(errors);
         } else if (!user.getVerificationCode().equals(input.getVerificationCode())) {
-            errors.put("verificationCode", List.of("Invalid verification code"));
+            errors.put("verificationCode", List.of("Invalid verification code, actual: "
+                    + input.getVerificationCode()
+                    + ", expected: " + user.getVerificationCode()));
             throw new SignUpException(errors);
         }
 
