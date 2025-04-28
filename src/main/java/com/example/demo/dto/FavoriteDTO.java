@@ -1,7 +1,5 @@
 package com.example.demo.dto;
 
-// FavoriteDTO.java
-
 import lombok.Data;
 
 import java.math.BigDecimal;

@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -22,6 +23,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.example.demo.models.ProductSpecifications.*;
 
 @Service
 @RequiredArgsConstructor
@@ -61,8 +64,13 @@ public class ProductService {
         }
     }
 
-    public Page<Product> getAllProducts(Pageable pageable) {
-        return productRepository.findAll(pageable);
+    public Page<Product> getAllProducts(Pageable pageable, String title, BigDecimal minPrice, BigDecimal maxPrice, Long categoryId) {
+        Specification<Product> spec = Specification.where(
+                        hasTitle(title))
+                .and(hasMinPrice(minPrice))
+                .and(hasMaxPrice(maxPrice))
+                .and(hasCategory(categoryId));
+        return productRepository.findAll(spec, pageable);
     }
 
     public Product getProductById(Long id) {

@@ -1,4 +1,3 @@
-// ProductDTO.java (запрос/ответ)
 package com.example.demo.dto;
 
 import lombok.Data;
