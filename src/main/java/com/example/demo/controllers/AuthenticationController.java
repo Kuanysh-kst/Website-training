@@ -4,7 +4,7 @@ import com.example.demo.dto.request.AuthenticationRequest;
 import com.example.demo.dto.request.ResendVerificationCodeRequest;
 import com.example.demo.dto.response.AuthenticationResponse;
 import com.example.demo.dto.request.VerifyUserRequest;
-import com.example.demo.services.AuthenticationService;
+import com.example.demo.services.login.AuthenticationService;
 import com.example.demo.dto.request.SignUpRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

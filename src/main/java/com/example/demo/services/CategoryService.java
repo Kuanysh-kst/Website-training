@@ -4,7 +4,7 @@ import com.example.demo.dto.CategoryDTO;
 import com.example.demo.dto.response.CategoryResponseDTO;
 import com.example.demo.dto.response.ProductResponseDTO;
 import com.example.demo.exceptions.notfound.CategoryNotFoundException;
-import com.example.demo.exceptions.DuplicateCategoryException;
+import com.example.demo.exceptions.duplicate.CategoryDuplicateException;
 import com.example.demo.models.Category;
 import com.example.demo.repositories.CategoryRepository;
 import jakarta.transaction.Transactional;
@@ -29,7 +29,7 @@ public class CategoryService {
         Map<String, List<String>> errors = new HashMap<>();
         if (categoryRepository.existsByName(categoryDTO.getName())) {
             errors.put("category", List.of("category is exist: " + categoryDTO.getName()));
-            throw new DuplicateCategoryException(errors);
+            throw new CategoryDuplicateException(errors);
         }
         Category category = Category.builder()
                 .name(categoryDTO.getName())
@@ -64,7 +64,7 @@ public class CategoryService {
 
         if (categoryRepository.existsByName(categoryDTO.getName())) {
             errors.put("category", List.of("category is exist: " + categoryDTO.getName()));
-            throw new DuplicateCategoryException(errors);
+            throw new CategoryDuplicateException(errors);
         }
 
         category.setName(categoryDTO.getName());

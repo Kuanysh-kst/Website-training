@@ -1,10 +1,9 @@
 package com.example.demo.controllers;
 
-import com.example.demo.models.MyUser;
 import com.example.demo.services.FavoriteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,25 +17,28 @@ import org.springframework.web.bind.annotation.RestController;
 public class FavoriteController {
     private final FavoriteService favoriteService;
 
-    @GetMapping
-    public ResponseEntity<?> getFavorites(@AuthenticationPrincipal MyUser user) {
-        return ResponseEntity.ok(favoriteService.getUserFavorites(user.getEmail()));
+    @GetMapping("/all")
+    public ResponseEntity<?> getFavorites(Authentication authentication) {
+        String email = authentication.getName(); // Получаем email (username)
+        return ResponseEntity.ok(favoriteService.getUserFavorites(email));
     }
 
     @PostMapping("/{productId}")
     public ResponseEntity<?> addFavorite(
-            @AuthenticationPrincipal MyUser user,
+            Authentication authentication,
             @PathVariable Long productId
     ) {
-        return ResponseEntity.ok(favoriteService.addFavorite(user.getEmail(), productId));
+        String email = authentication.getName();
+        return ResponseEntity.ok(favoriteService.addFavorite(email, productId));
     }
 
     @DeleteMapping("/{productId}")
     public ResponseEntity<?> removeFavorite(
-            @AuthenticationPrincipal MyUser user,
+            Authentication authentication,
             @PathVariable Long productId
     ) {
-        favoriteService.removeFavorite(user.getEmail(), productId);
+        String email = authentication.getName();
+        favoriteService.removeFavorite(email, productId);
         return ResponseEntity.noContent().build();
     }
 }

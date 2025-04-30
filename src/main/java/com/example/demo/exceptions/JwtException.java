@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Map;
 
 @Getter
-public class DuplicateCategoryException extends RuntimeException {
+public class JwtException extends RuntimeException {
     private final Map<String, List<String>> errors;
 
-    public DuplicateCategoryException(Map<String, List<String>> errors) {
+    public JwtException(Map<String, List<String>> errors) {
         super(ErrorUtils.buildErrorMessage(errors));
         this.errors = errors;
     }

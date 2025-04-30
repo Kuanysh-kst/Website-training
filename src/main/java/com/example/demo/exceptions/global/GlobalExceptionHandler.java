@@ -2,9 +2,12 @@ package com.example.demo.exceptions.global;
 
 import com.example.demo.dto.response.ApiErrorResponse;
 import com.example.demo.exceptions.AuthenticationFailedException;
-import com.example.demo.exceptions.DuplicateCategoryException;
+import com.example.demo.exceptions.JwtException;
+import com.example.demo.exceptions.duplicate.CategoryDuplicateException;
 import com.example.demo.exceptions.InvalidProductDataException;
 import com.example.demo.exceptions.SignUpException;
+import com.example.demo.exceptions.duplicate.DuplicateException;
+import com.example.demo.exceptions.duplicate.ProductDuplicateException;
 import com.example.demo.exceptions.notfound.CategoryNotFoundException;
 import com.example.demo.exceptions.notfound.NotFoundException;
 import com.example.demo.exceptions.notfound.ProductNotFoundException;
@@ -47,8 +50,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
-    @ExceptionHandler({DuplicateCategoryException.class})
-    public ResponseEntity<ApiErrorResponse> handleDuplicateCategoryErrors(DuplicateCategoryException exception) {
+    @ExceptionHandler({CategoryDuplicateException.class, ProductDuplicateException.class})
+    public ResponseEntity<ApiErrorResponse> handleDuplicateErrors(DuplicateException exception) {
         Map<String, List<String>> errors;
         errors = exception.getErrors();
 
@@ -98,4 +101,17 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ApiErrorResponse> handleJwtExceptionException(JwtException exception) {
+        Map<String, List<String>> errors = new HashMap<>();
+        errors.put("key", List.of(exception.getMessage()));
+
+        ApiErrorResponse response = new ApiErrorResponse(errors,
+                "error",
+                HttpStatus.UNAUTHORIZED.value()
+        );
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
 }
