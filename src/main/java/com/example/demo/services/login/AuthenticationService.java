@@ -5,7 +5,7 @@ import com.example.demo.dto.request.ResendVerificationCodeRequest;
 import com.example.demo.dto.response.AuthenticationResponse;
 import com.example.demo.dto.request.SignUpRequest;
 import com.example.demo.dto.request.VerifyUserRequest;
-import com.example.demo.exceptions.AuthenticationFailedException;
+import com.example.demo.exceptions.unauthorized.AuthenticationFailedException;
 import com.example.demo.exceptions.SignUpException;
 import com.example.demo.models.MyUser;
 import com.example.demo.repositories.MyUserRepository;
