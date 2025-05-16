@@ -1,5 +1,6 @@
 package com.example.demo.config;
 
+import com.example.demo.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,11 +33,25 @@ public class SecurityConfig {
     private final LogoutHandler logoutHandler;
     private static final String[] GET_WHITE_LIST_URL = {
             "/welcome",
-            "/api/v1/demo-controller"
+            "/api/v1/demo-controller",
+            "/api/categories/**",
+            "/api/products/**"
     };
     private static final String[] POST_WHITE_LIST_URL = {
             "/api/v1/auth/**",
-            "/v3/api-docs/**"
+            "/v3/api-docs/**",
+            "/api/categories/**",
+            "/api/products/**"
+
+    };
+    private static final String[] PUT_WHITE_LIST_URL = {
+            "/api/categories/**",
+            "/api/products/**"
+
+    };
+    private static final String[] DELETE_WHITE_LIST_URL = {
+            "/api/categories/**",
+            "/api/products/**"
     };
 
     @Bean
@@ -48,6 +63,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // <=== это нужно
                         .requestMatchers(HttpMethod.GET, GET_WHITE_LIST_URL).permitAll()
                         .requestMatchers(HttpMethod.POST, POST_WHITE_LIST_URL).permitAll()
+                        .requestMatchers(HttpMethod.PUT, PUT_WHITE_LIST_URL).permitAll()
+                        .requestMatchers(HttpMethod.DELETE, DELETE_WHITE_LIST_URL).permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

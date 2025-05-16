@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 @Getter
-public class SignUpException extends RuntimeException {
+public class ProductCreationException extends RuntimeException {
     private final Map<String, List<String>> errors;
-    public SignUpException(Map<String, List<String>> errors) {
+    public ProductCreationException(Map<String, List<String>> errors) {
         super(ErrorUtils.buildErrorMessage(errors));
         this.errors = errors;
     }

@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Map;
 
 @Getter
-public class AuthenticationFailedException extends RuntimeException {
+public class InvalidProductDataException extends RuntimeException {
     private final Map<String, List<String>> errors;
 
-    public AuthenticationFailedException(Map<String, List<String>> errors) {
+    public InvalidProductDataException(Map<String, List<String>> errors) {
         super(ErrorUtils.buildErrorMessage(errors));
         this.errors = errors;
     }
