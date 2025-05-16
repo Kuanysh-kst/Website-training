@@ -1,9 +1,11 @@
 package com.example.demo.repositories;
 
 import com.example.demo.models.Favorite;
+import com.example.demo.models.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,4 +38,8 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
     // 6. Количество избранных товаров пользователя
     @Query("SELECT COUNT(f) FROM Favorite f WHERE f.user.email = :email")
     int countByUserEmail(String email);
+
+    // Получить только продукты из избранного пользователя (оптимизированный запрос)
+    @Query("SELECT f.product FROM Favorite f WHERE f.user.email = :email")
+    List<Product> findProductsByUserEmail(@Param("email") String email);
 }

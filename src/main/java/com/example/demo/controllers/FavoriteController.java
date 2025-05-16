@@ -1,5 +1,6 @@
 package com.example.demo.controllers;
 
+import com.example.demo.models.Product;
 import com.example.demo.services.FavoriteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -11,13 +12,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/favorites")
 @RequiredArgsConstructor
 public class FavoriteController {
     private final FavoriteService favoriteService;
 
-    @GetMapping("/all")
+    @GetMapping
     public ResponseEntity<?> getFavorites(Authentication authentication) {
         String email = authentication.getName(); // Получаем email (username)
         return ResponseEntity.ok(favoriteService.getUserFavorites(email));
@@ -40,5 +43,11 @@ public class FavoriteController {
         String email = authentication.getName();
         favoriteService.removeFavorite(email, productId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/products")
+    public ResponseEntity<List<Product>> getFavoriteProducts(Authentication authentication) {
+        String email = authentication.getName();
+        return ResponseEntity.ok(favoriteService.getFavoriteProductsByUserEmail(email));
     }
 }

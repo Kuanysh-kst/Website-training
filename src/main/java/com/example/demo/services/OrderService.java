@@ -1,6 +1,11 @@
 package com.example.demo.services;
 
-import com.example.demo.models.*;
+import com.example.demo.dto.request.OrderRequest;
+import com.example.demo.dto.response.OrderResponse;
+import com.example.demo.models.MyUser;
+import com.example.demo.models.Order;
+import com.example.demo.models.OrderItem;
+import com.example.demo.models.Product;
 import com.example.demo.repositories.OrderRepository;
 import com.example.demo.repositories.OrderItemRepository;
 import com.example.demo.repositories.ProductRepository;
@@ -9,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -18,30 +25,31 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final ProductRepository productRepository;
-    private final CartService cartService;
 
     @Transactional
-    public Order createOrder(MyUser user) {
-        Cart cart = cartService.getCartByUser(user);
-        if (cart.getItems().isEmpty()) {
-            throw new RuntimeException("Cart is empty");
+    public Map<String, Object> createOrder(MyUser user, OrderRequest orderRequest) {
+        Map<String, Object> response = new HashMap<>();
+        if (orderRequest.getItems() == null || orderRequest.getItems().isEmpty()) {
+            throw new RuntimeException("Order items cannot be empty");
         }
 
         Order order = Order.builder()
                 .user(user)
                 .orderDate(LocalDateTime.now())
-                .status("PENDING")
+                .totalPrice(orderRequest.getTotalPrice())
                 .build();
 
         Order savedOrder = orderRepository.save(order);
 
-        List<OrderItem> orderItems = cart.getItems().stream()
-                .map(cartItem -> {
-                    Product product = cartItem.getProduct();
+        List<OrderItem> orderItems = orderRequest.getItems().stream()
+                .map(itemRequest -> {
+                    Product product = productRepository.findById(itemRequest.getProductId())
+                            .orElseThrow(() -> new RuntimeException("Product not found with id: " + itemRequest.getProductId()));
+
                     OrderItem orderItem = OrderItem.builder()
                             .order(savedOrder)
                             .product(product)
-                            .quantity(cartItem.getQuantity())
+                            .quantity(itemRequest.getQuantity())
                             .priceAtPurchase(product.getPrice())
                             .build();
                     return orderItemRepository.save(orderItem);
@@ -49,18 +57,33 @@ public class OrderService {
                 .collect(Collectors.toList());
 
         savedOrder.setItems(orderItems);
-        cartService.clearCart(cart.getId());
-        return savedOrder;
+
+        response.put("id", savedOrder.getId());
+        response.put("status", "success");
+        response.put("code", 201);
+        return response;
     }
 
-    public List<Order> getUserOrders(Long userId) {
-        return orderRepository.findByUserId(userId);
-    }
+    public List<OrderResponse> getUserOrders(Long userId) {
+        List<Order> orders = orderRepository.findByUserIdWithItems(userId);
 
-    public Order updateOrderStatus(Long orderId, String status) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
-        order.setStatus(status);
-        return orderRepository.save(order);
+        return orders.stream().map(order -> {
+            OrderResponse response = new OrderResponse();
+            response.setId(order.getId());
+            response.setOrderDate(order.getOrderDate());
+            response.setTotalPrice(order.getTotalPrice());
+
+            List<OrderResponse.OrderItemResponse> itemResponses = order.getItems().stream().map(item -> {
+                OrderResponse.OrderItemResponse itemResponse = new OrderResponse.OrderItemResponse();
+                itemResponse.setProductId(item.getProduct().getId());
+                itemResponse.setProductName(item.getProduct().getTitle());
+                itemResponse.setQuantity(item.getQuantity());
+                itemResponse.setPriceAtPurchase(item.getPriceAtPurchase());
+                return itemResponse;
+            }).collect(Collectors.toList());
+
+            response.setItems(itemResponses);
+            return response;
+        }).collect(Collectors.toList());
     }
 }

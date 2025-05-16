@@ -76,4 +76,8 @@ public class FavoriteService {
                 favorite.getProduct().getId()
         );
     }
+
+    public List<Product> getFavoriteProductsByUserEmail(String email) {
+        return favoriteRepository.findProductsByUserEmail(email);
+    }
 }

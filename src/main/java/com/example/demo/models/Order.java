@@ -1,18 +1,12 @@
 package com.example.demo.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -32,8 +26,8 @@ public class Order {
     private MyUser user;
 
     private LocalDateTime orderDate;
-    private String status; // "PENDING", "COMPLETED", "CANCELLED"
 
-    @OneToMany(mappedBy = "order")
+    private BigDecimal totalPrice;
+    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER)
     private List<OrderItem> items;
 }
