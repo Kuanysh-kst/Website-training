@@ -1,12 +1,6 @@
 package com.example.courses.kargopolov.main;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvFileSource;
@@ -40,6 +34,11 @@ public class CalculatorTest {
     @AfterEach
     void afterEachTestMethod() {
         System.out.println("Executing @AfterEach method!");
+    }
+
+    @Test
+    void shouldPass() {
+        assertTrue(true);
     }
 
     //test<System under test or method under test>_<Condition or state change>_<Expected result>
