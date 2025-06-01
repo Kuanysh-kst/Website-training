@@ -2,6 +2,7 @@ package com.example.demo.services;
 
 import com.example.demo.dto.ProductDTO;
 import com.example.demo.dto.response.ProductResponseDTO;
+import com.example.demo.exceptions.InvalidProductDataException;
 import com.example.demo.models.Category;
 import com.example.demo.models.Product;
 import com.example.demo.repositories.CategoryRepository;
@@ -16,6 +17,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,7 +29,7 @@ public class ProductServiceTest {
     BigDecimal price;
     String imageUrl;
     Long categoryId;
-    String categoryName;
+    Category category;
 
     @InjectMocks
     private ProductService productService;
@@ -43,18 +47,17 @@ public class ProductServiceTest {
         price = new BigDecimal("1000000");
         imageUrl = "https://www.google.com/search?sca_esv=e959774ba9715974&sxsrf=AE3TifPHX3fnj7_JeMK0F1kIQ3CPvnD4-A:1748537005410&q=acer+nitro+5+an515-57+drivers&udm=2&fbs=AIIjpHy3vMFde4-A-s4rkZ3m7V6OBOGFvzWdNs_AW9AWwX0uEr0-Kz8D1ggHfcxRhV96GyEzhFKKgWiDCPxEDWuHlaSnjKih7Fu1ZyY764BeAfZttjfOhT9Q6awKs-M0MauHyO0oOPtxrVNbIHyAqs-9z7h9mdPLQ5Rr66wmKXs3k3ByGFr5KfhEtf3DF0RcXUNlGxIp-5piP-4zMlJv7e9X-1qB_QW0E7SufVoZ2_YDf298sZYqgzyVloBeUw67woktbYS-sYMZ4kTfXPMLD2Eul6QitTsiRA&sa=X&ved=2ahUKEwjY-dX4j8mNAxU9QFUIHbGiKxgQtKgLegQIFRAB&biw=1536&bih=731&dpr=1.25#vhid=_8PQbwzfNUwXPM&vssid=mosaic";
         categoryId = 1L;
-        categoryName = "Mock category";
+        category = new Category(1L, "Mock category");
     }
 
     @Test
-    void testCreateProduct_WhenProductDetailsProvided_returnsProductObject() {
+    void testCreateProduct_whenProductDetailsProvided_returnsProductObject() {
         //Arrange
         ProductDTO productDTOMock = new ProductDTO(title, description, price, imageUrl, categoryId);
 
-        Category mockCategory = new Category(categoryId,categoryName);
-        Mockito.when(mockCategoryRepository.findById(Mockito.any(Long.class))).thenReturn(Optional.of(mockCategory));
+        Mockito.when(mockCategoryRepository.findById(Mockito.any(Long.class))).thenReturn(Optional.of(category));
 
-        Product savedProduct = new Product(1L, title, description, price, imageUrl, mockCategory);
+        Product savedProduct = new Product(1L, title, description, price, imageUrl, category);
         Mockito.when(mockProductRepository.save(Mockito.any(Product.class))).thenReturn(savedProduct);
 
         ProductResponseDTO expectedResponse = new ProductResponseDTO(title, description, price, imageUrl, categoryId);
@@ -64,5 +67,114 @@ public class ProductServiceTest {
 
         // Assert
         Assertions.assertEquals(expectedResponse, mockProductResponseDTO);
+    }
+
+    @Test
+    void testCreateProduct_whenTitleIsEmpty_throwInvalidProductDataException() {
+        //Arrange
+        ProductDTO emptyTitleProductDto = new ProductDTO(null, description, price, imageUrl, categoryId);
+
+        Mockito.when(mockCategoryRepository.findById(Mockito.any(Long.class))).thenReturn(Optional.of(category));
+        // Act
+        InvalidProductDataException actualError = Assertions.assertThrows(InvalidProductDataException.class,
+                () -> productService.createProduct(emptyTitleProductDto),
+                "Empty title should have caused an Invalid Product Argument Exception");
+        Map<String, List<String>> error = new HashMap<>();
+        error.put("title", List.of("Product title cannot be empty"));
+        Assertions.assertEquals(error, actualError.getErrors());
+    }
+
+    @Test
+    void testCreateProduct_whenDescriptionExceedLimit_throwInvalidProductDataException() {
+        //Arrange
+        ProductDTO emptyDescriptionProductDto = new ProductDTO(title, "x".repeat(501), price, imageUrl, categoryId);
+        Mockito.when(mockCategoryRepository.findById(Mockito.any(Long.class))).thenReturn(Optional.of(category));
+        // Act
+        InvalidProductDataException actualError = Assertions.assertThrows(InvalidProductDataException.class,
+                () -> productService.createProduct(emptyDescriptionProductDto),
+                "Empty Description should have caused an Invalid Product Argument Exception");
+        Map<String, List<String>> error = new HashMap<>();
+        error.put("description", List.of("Product description cannot exceed 500 characters"));
+        Assertions.assertEquals(error, actualError.getErrors());
+    }
+
+    @Test
+    void testCreateProduct_whenPriceIsEmpty_throwInvalidProductDataException() {
+        //Arrange
+        ProductDTO emptyDescriptionProductDto = new ProductDTO(title, description, null, imageUrl, categoryId);
+        Mockito.when(mockCategoryRepository.findById(Mockito.any(Long.class))).thenReturn(Optional.of(category));
+        // Act
+        InvalidProductDataException actualError = Assertions.assertThrows(InvalidProductDataException.class,
+                () -> productService.createProduct(emptyDescriptionProductDto),
+                "Empty Price should have caused an Invalid Product Argument Exception");
+        Map<String, List<String>> error = new HashMap<>();
+        error.put("price", List.of("Price is required"));
+        Assertions.assertEquals(error, actualError.getErrors());
+    }
+
+    @Test
+    void testCreateProduct_whenPriceIsMinus_throwInvalidProductDataException() {
+        //Arrange
+        ProductDTO emptyDescriptionProductDto = new ProductDTO(title, description, new BigDecimal("-1"), imageUrl, categoryId);
+        Mockito.when(mockCategoryRepository.findById(Mockito.any(Long.class))).thenReturn(Optional.of(category));
+        // Act
+        InvalidProductDataException actualError = Assertions.assertThrows(InvalidProductDataException.class,
+                () -> productService.createProduct(emptyDescriptionProductDto),
+                "Minus Price should have caused an Invalid Product Argument Exception");
+        Map<String, List<String>> error = new HashMap<>();
+        error.put("price", List.of("Price must be greater than 0"));
+        Assertions.assertEquals(error, actualError.getErrors());
+    }
+
+    @Test
+    void testCreateProduct_whenPriceHasMoreScale_throwInvalidProductDataException() {
+        //Arrange
+        ProductDTO emptyDescriptionProductDto = new ProductDTO(title, description, new BigDecimal("1.111"), imageUrl, categoryId);
+        Mockito.when(mockCategoryRepository.findById(Mockito.any(Long.class))).thenReturn(Optional.of(category));
+        // Act
+        InvalidProductDataException actualError = Assertions.assertThrows(InvalidProductDataException.class,
+                () -> productService.createProduct(emptyDescriptionProductDto),
+                "More scale Price should have caused an Invalid Product Argument Exception");
+        Map<String, List<String>> error = new HashMap<>();
+        error.put("price", List.of("Price cannot have more than 2 decimal places"));
+        Assertions.assertEquals(error, actualError.getErrors());
+    }
+
+    @Test
+    void testCreateProduct_whenImageUrlIsInvalid_throwInvalidProductDataException() {
+        //Arrange
+        String invalidImageUrl = "htdp:/invalid/url";
+        ProductDTO emptyDescriptionProductDto = new ProductDTO(title, description, price, invalidImageUrl, categoryId);
+        Mockito.when(mockCategoryRepository.findById(Mockito.any(Long.class))).thenReturn(Optional.of(category));
+        // Act
+        InvalidProductDataException actualError = Assertions.assertThrows(InvalidProductDataException.class,
+                () -> productService.createProduct(emptyDescriptionProductDto),
+                "Invalid Image url should have caused an Invalid Product Argument Exception");
+        Map<String, List<String>> error = new HashMap<>();
+        error.put("imageUrl", List.of("Invalid image URL format"));
+        Assertions.assertEquals(error, actualError.getErrors());
+    }
+
+    @Test
+    void testCreateProduct_whenCategoryIdIsEmpty_throwInvalidProductDataException() {
+        //Arrange
+        ProductDTO emptyDescriptionProductDto = new ProductDTO(title, description, price, imageUrl, null);
+        // Act
+        InvalidProductDataException actualError = Assertions.assertThrows(InvalidProductDataException.class,
+                () -> productService.createProduct(emptyDescriptionProductDto),
+                "Empty category id should have caused an Invalid Product Argument Exception");
+        Map<String, List<String>> error = new HashMap<>();
+        error.put("category", List.of("Category with id null not found"));
+        Assertions.assertEquals(error, actualError.getErrors());
+    }
+
+    @Test
+    void testCreateProduct_whenProductDtoIsEmpty_throwInvalidProductDataException() {
+        InvalidProductDataException actualError = Assertions.assertThrows(InvalidProductDataException.class,
+                () -> productService.createProduct(null),
+                "Empty product dto should have caused an Invalid Product Argument Exception");
+        Map<String, List<String>> error = new HashMap<>();
+        error.put("product", List.of("Product is Empty"));
+        Assertions.assertEquals(error, actualError.getErrors());
     }
 }

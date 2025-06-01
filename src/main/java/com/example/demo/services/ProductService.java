@@ -34,9 +34,20 @@ public class ProductService {
 
     @Transactional
     public ProductResponseDTO createProduct(ProductDTO productDTO) {
+        if (productDTO == null ) {
+            Map<String, List<String>> errors = new HashMap<>();
+            errors.put("product", List.of("Product is Empty"));
+            throw new InvalidProductDataException(errors);
+        }
         Map<String, List<String>> errors = validateProductDTO(productDTO);
+        Category category;
 
-        Category category = categoryRepository.findById(productDTO.getCategoryId()).orElse(null);
+        if (productDTO.getCategoryId() == null) {
+            errors.put("category", List.of("Category ID is required"));
+            category = null;
+        } else {
+            category = categoryRepository.findById(productDTO.getCategoryId()).orElse(null);
+        }
 
         if (category == null) {
             errors.put("category", List.of("Category with id " + productDTO.getCategoryId() + " not found"));
@@ -151,7 +162,7 @@ public class ProductService {
             errors.put("title", List.of("Product title cannot exceed 100 characters"));
         }
 
-        // Валидация описания
+        // Валидация описания productDTO.getDescription().length()
         if (productDTO.getDescription() != null && productDTO.getDescription().length() > 500) {
             errors.put("description", List.of("Product description cannot exceed 500 characters"));
         }
@@ -170,10 +181,6 @@ public class ProductService {
             errors.put("imageUrl", List.of("Invalid image URL format"));
         }
 
-        // Валидация категории
-        if (productDTO.getCategoryId() == null) {
-            errors.put("category", List.of("Category ID is required"));
-        }
         return errors;
     }
 
