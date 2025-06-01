@@ -101,11 +101,11 @@ public class ProductServiceTest {
     @Test
     void testCreateProduct_whenPriceIsEmpty_throwInvalidProductDataException() {
         //Arrange
-        ProductDTO emptyDescriptionProductDto = new ProductDTO(title, description, null, imageUrl, categoryId);
+        ProductDTO overLimitDescriptionProductDto = new ProductDTO(title, description, null, imageUrl, categoryId);
         Mockito.when(mockCategoryRepository.findById(Mockito.any(Long.class))).thenReturn(Optional.of(category));
         // Act
         InvalidProductDataException actualError = Assertions.assertThrows(InvalidProductDataException.class,
-                () -> productService.createProduct(emptyDescriptionProductDto),
+                () -> productService.createProduct(overLimitDescriptionProductDto),
                 "Empty Price should have caused an Invalid Product Argument Exception");
         Map<String, List<String>> error = new HashMap<>();
         error.put("price", List.of("Price is required"));

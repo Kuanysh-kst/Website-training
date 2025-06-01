@@ -24,7 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.example.demo.models.ProductSpecifications.*;
+import static com.example.demo.models.ProductSpecifications.hasCategory;
+import static com.example.demo.models.ProductSpecifications.hasMaxPrice;
+import static com.example.demo.models.ProductSpecifications.hasMinPrice;
+import static com.example.demo.models.ProductSpecifications.hasTitle;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +37,7 @@ public class ProductService {
 
     @Transactional
     public ProductResponseDTO createProduct(ProductDTO productDTO) {
-        if (productDTO == null ) {
+        if (productDTO == null) {
             Map<String, List<String>> errors = new HashMap<>();
             errors.put("product", List.of("Product is Empty"));
             throw new InvalidProductDataException(errors);
@@ -58,17 +61,10 @@ public class ProductService {
         }
 
         try {
-            Product product = Product.builder()
-                    .title(productDTO.getTitle())
-                    .description(productDTO.getDescription())
-                    .price(productDTO.getPrice())
-                    .imageUrl(productDTO.getImageUrl())
-                    .category(category)
-                    .build();
-
+            Product product = mapToProductDtoProduct(productDTO, category);
             Product savedProduct = productRepository.save(product);
             return mapToProductResponseDTO(savedProduct);
-        } catch (DataIntegrityViolationException e) {
+        } catch (Exception exception) {
             Map<String, List<String>> error = new HashMap<>();
             error.put("product", List.of("Failed to create product due to database error"));
             throw new ProductCreationException(error);
@@ -149,6 +145,16 @@ public class ProductService {
                 .price(product.getPrice())
                 .imageUrl(product.getImageUrl())
                 .categoryId(product.getCategory().getId())
+                .build();
+    }
+
+    public Product mapToProductDtoProduct(ProductDTO productDTO, Category category) {
+        return Product.builder()
+                .title(productDTO.getTitle())
+                .description(productDTO.getDescription())
+                .price(productDTO.getPrice())
+                .imageUrl(productDTO.getImageUrl())
+                .category(category)
                 .build();
     }
 
