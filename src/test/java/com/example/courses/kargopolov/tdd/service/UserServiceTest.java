@@ -2,15 +2,21 @@ package com.example.courses.kargopolov.tdd.service;
 
 import com.example.courses.kargopolov.model.FakeUser;
 import com.example.courses.kargopolov.repository.FakerUserRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -38,15 +44,15 @@ public class UserServiceTest {
     @Test
     void testCreateUser_WhenUserDetailsProvided_returnsUserObject() {
         // Arrange
-        Mockito.when(userRepository.save(Mockito.any(FakeUser.class))).thenReturn(true);
+        when(userRepository.save(any(FakeUser.class))).thenReturn(true);
         // Act
         FakeUser user = userService.createUser(firstName, lastName, email, password, repeatPassword);
 
         // Assert
-        Assertions.assertEquals(firstName, user.getFirstName(), "The firstName should be the same");
-        Assertions.assertNotNull(user, "The createUser() should not have return null");
-        Assertions.assertNotNull(user.getId(), "User missing the id");
-        Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(FakeUser.class));
+        assertEquals(firstName, user.getFirstName(), "The firstName should be the same");
+        assertNotNull(user, "The createUser() should not have return null");
+        assertNotNull(user.getId(), "User missing the id");
+        verify(userRepository, times(1)).save(any(FakeUser.class));
     }
 
     @DisplayName("Empty first name causes  correct exception")
@@ -55,12 +61,12 @@ public class UserServiceTest {
         //Arrange
         firstName = "";
         // Act & Assert
-        IllegalArgumentException illegalArgumentException = Assertions.assertThrows(IllegalArgumentException.class, () -> {
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> {
             FakeUser user = userService.createUser(firstName, lastName, email, password, repeatPassword);
         }, "Empty first name should have caused an Illegal Argument Exception");
         String expectedExceptionMessage = "User first name is empty";
         // Assert
-        Assertions.assertEquals(expectedExceptionMessage, illegalArgumentException.getMessage(),
+        assertEquals(expectedExceptionMessage, illegalArgumentException.getMessage(),
                 "Exception error massage is not correct");
     }
 }

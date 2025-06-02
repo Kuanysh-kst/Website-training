@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -79,8 +78,8 @@ public class ProductServiceTest {
         assertEquals(price, actualProductResponseDTO.getPrice());
         assertEquals(imageUrl, actualProductResponseDTO.getImageUrl());
         assertEquals(categoryId, actualProductResponseDTO.getCategoryId());
-        verify(mockCategoryRepository, times(1)).findById(any(Long.class));
-        verify(mockProductRepository, times(1)).save(any(Product.class));
+        verify(mockCategoryRepository).findById(any(Long.class));
+        verify(mockProductRepository).save(any(Product.class));
     }
 
     @Test
