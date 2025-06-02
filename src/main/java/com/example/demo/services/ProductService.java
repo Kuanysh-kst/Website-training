@@ -72,8 +72,8 @@ public class ProductService {
     }
 
     public Page<Product> getAllProducts(Pageable pageable, String title, BigDecimal minPrice, BigDecimal maxPrice, Long categoryId) {
-        Specification<Product> spec = Specification.where(
-                        hasTitle(title))
+        Specification<Product> spec = Specification
+                .where(hasTitle(title))
                 .and(hasMinPrice(minPrice))
                 .and(hasMaxPrice(maxPrice))
                 .and(hasCategory(categoryId));

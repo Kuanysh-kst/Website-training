@@ -46,6 +46,7 @@ public class UserServiceTest {
         Assertions.assertEquals(firstName, user.getFirstName(), "The firstName should be the same");
         Assertions.assertNotNull(user, "The createUser() should not have return null");
         Assertions.assertNotNull(user.getId(), "User missing the id");
+        Mockito.verify(userRepository, Mockito.times(1)).save(Mockito.any(FakeUser.class));
     }
 
     @DisplayName("Empty first name causes  correct exception")
