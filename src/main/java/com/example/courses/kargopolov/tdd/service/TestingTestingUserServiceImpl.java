@@ -9,9 +9,11 @@ import java.util.UUID;
 public class TestingTestingUserServiceImpl implements TestingUserService {
 
     TestingUserRepository userRepository;
+    EmailVerificationService emailVerificationService;
 
-    public TestingTestingUserServiceImpl(TestingUserRepository userRepository) {
+    public TestingTestingUserServiceImpl(TestingUserRepository userRepository, EmailVerificationService emailVerificationService) {
         this.userRepository = userRepository;
+        this.emailVerificationService = emailVerificationService;
     }
 
     @Override
@@ -21,12 +23,12 @@ public class TestingTestingUserServiceImpl implements TestingUserService {
             throw new IllegalArgumentException("User first name is empty");
         }
 
-        TestingUser testingUser = new TestingUser(UUID.randomUUID().toString(), firstName, lastName, email, password, repeatPassword);
+        TestingUser user = new TestingUser(UUID.randomUUID().toString(), firstName, lastName, email, password, repeatPassword);
 
         boolean isUserCreated;
 
         try {
-            isUserCreated = userRepository.save(testingUser);
+            isUserCreated = userRepository.save(user);
         } catch (RuntimeException exception) {
             throw new TestingUserException(exception.getMessage());
         }
@@ -34,6 +36,12 @@ public class TestingTestingUserServiceImpl implements TestingUserService {
         if (!isUserCreated) {
             throw new TestingUserException("Could not create user");
         }
-        return testingUser;
+
+        try {
+            emailVerificationService.scheduleEmailConfirmation(user);
+        } catch (RuntimeException exception) {
+            throw new TestingUserException(exception.getMessage());
+        }
+        return user;
     }
 }

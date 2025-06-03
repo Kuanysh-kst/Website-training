@@ -1,5 +1,6 @@
 package com.example.courses.kargopolov.tdd.service;
 
+import com.example.courses.kargopolov.exception.EmailVerificationException;
 import com.example.courses.kargopolov.exception.TestingUserException;
 import com.example.courses.kargopolov.model.TestingUser;
 import com.example.courses.kargopolov.repository.TestingUserRepository;
@@ -14,10 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -26,6 +24,9 @@ public class UserServiceTest {
 
     @Mock
     TestingUserRepository userRepository;
+
+    @Mock
+    EmailVerificationService emailVerificationService;
 
     String firstName;
     String lastName;
@@ -62,9 +63,8 @@ public class UserServiceTest {
         //Arrange
         firstName = "";
         // Act & Assert
-        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> {
-            TestingUser user = userService.createUser(firstName, lastName, email, password, repeatPassword);
-        }, "Empty first name should have caused an Illegal Argument Exception");
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+                () -> userService.createUser(firstName, lastName, email, password, repeatPassword), "Empty first name should have caused an Illegal Argument Exception");
         String expectedExceptionMessage = "User first name is empty";
         // Assert
         assertEquals(expectedExceptionMessage, illegalArgumentException.getMessage(),
@@ -76,10 +76,24 @@ public class UserServiceTest {
     void testCreateUser_whenSaveMethodThrowsException_thenThrowsUserServiceException() {
         // Arrange
         when(userRepository.save(any(TestingUser.class))).thenThrow(RuntimeException.class);
-        // Act
-        assertThrows(TestingUserException.class, () -> {
-            userService.createUser(firstName, lastName, email, password, repeatPassword);
-        }, "Should have thrown FakerUserException instead");
-        // Assert
+        // Act and Assert
+        assertThrows(TestingUserException.class, () ->
+                userService.createUser(firstName, lastName, email, password, repeatPassword), "Should have thrown FakerUserException instead");
+    }
+
+    @DisplayName("EmailNotificationException is handled")
+    @Test
+    void testCreateUser_whenEmailNotificationExceptionThrown_throwsUserServiceException() {
+        //Arrange
+        when(userRepository.save(any(TestingUser.class))).thenReturn(true);
+
+        doThrow(EmailVerificationException.class)
+                .when(emailVerificationService)
+                .scheduleEmailConfirmation(any(TestingUser.class));
+
+        assertThrows(TestingUserException.class,
+                () -> userService.createUser(firstName, lastName, email, password, repeatPassword)
+                , "Should have thrown TestingUserException instead");
+
     }
 }
