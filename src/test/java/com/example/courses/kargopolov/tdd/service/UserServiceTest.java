@@ -15,7 +15,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -26,7 +31,7 @@ public class UserServiceTest {
     TestingUserRepository userRepository;
 
     @Mock
-    EmailVerificationService emailVerificationService;
+    EmailVerificationServiceImpl emailVerificationService;
 
     String firstName;
     String lastName;
@@ -94,6 +99,26 @@ public class UserServiceTest {
         assertThrows(TestingUserException.class,
                 () -> userService.createUser(firstName, lastName, email, password, repeatPassword)
                 , "Should have thrown TestingUserException instead");
+        verify(emailVerificationService, times(1))
+                .scheduleEmailConfirmation(any(TestingUser.class));
+    }
+    // метод doNothing заглушает метод который мы используем
+
+    @DisplayName("Schedule Email Confirmation is executed")
+    @Test
+    void testCreateUser_whenUserCreated_schedulesEmailConfirmation() {
+        // Arrange
+        when(userRepository.save(any(TestingUser.class))).thenReturn(true);
+
+        doCallRealMethod().when(emailVerificationService)
+                .scheduleEmailConfirmation(any(TestingUser.class));
+
+        // Act
+        userService.createUser(firstName, lastName, email, password, repeatPassword);
+
+        // Assert
+        verify(emailVerificationService, times(1))
+                .scheduleEmailConfirmation(any(TestingUser.class));
 
     }
 }
